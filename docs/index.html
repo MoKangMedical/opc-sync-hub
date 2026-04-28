@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPC Sync Hub - 项目同步管理中心 | MoKangMedical</title>
-    <meta name="description" content="OPC Sync Hub是MoKangMedical生态的项目同步管理中心，提供自动化部署、健康检查、报告生成等功能。">
+    <title>OPC Sync Hub - 项目同步管理中心 | OPC Sync Hub - 项目同步管理中心</title>
+    <meta name="description" content="OPC Sync Hub是OPC Sync Hub - 项目同步管理中心生态的项目同步管理中心，提供自动化部署、健康检查、报告生成等功能。">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -290,18 +290,72 @@
             .btn-group { flex-direction: column; align-items: center; }
             .btn { width: 100%; max-width: 300px; justify-content: center; }
         }
+        /* Top Nav */
+        .topnav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(2,6,23,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topnav-brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .topnav-brand span { color: var(--primary); }
+        .topnav-links { display: flex; gap: 8px; }
+        .topnav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .topnav-links a:hover { color: var(--light); background: rgba(255,255,255,0.05); }
+        .topnav-links a.active { color: var(--primary); background: rgba(37,99,235,0.1); }
     </style>
+  <meta property="og:title" content="OPC Sync Hub - 项目同步管理中心 | OPC Sync Hub - 项目同步管理中心">
+  <meta property="og:description" content="OPC Sync Hub是OPC Sync Hub - 项目同步管理中心生态的项目同步管理中心，提供自动化部署、健康检查、报告生成等功能。">
+  <meta property="og:type" content="website">
+<link rel="canonical" href="https://mokangmedical.github.io/opc-sync-hub/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OPC Sync Hub - 项目同步管理中心 | OPC Sync Hub - 项目同步管理中心","description":"OPC Sync Hub是OPC Sync Hub - 项目同步管理中心生态的项目同步管理中心，提供自动化部署、健康检查、报告生成等功能。","url":"https://mokangmedical.github.io/opc-sync-hub/","provider":{"@type":"Organization","name":"OPC Sync Hub - 项目同步管理中心"}}
+</script>
 </head>
 <body>
+    <!-- Top Nav -->
+    <nav class="topnav">
+        <a href="index.html" class="topnav-brand">🔄 <span>OPC Sync Hub</span></a>
+        <div class="topnav-links">
+            <a href="about.html">About</a>
+            <a href="features.html">Features</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub">GitHub</a>
+        </div>
+    </nav>
+
     <!-- Hero Section -->
     <section class="hero">
         <div class="container hero-content">
-            <span class="hero-badge">MoKangMedical 生态工具</span>
+            <span class="hero-badge">OPC Sync Hub - 项目同步管理中心 生态工具</span>
             <h1>OPC Sync Hub</h1>
             <p>项目同步管理中心，自动化部署、健康检查、报告生成，让您的项目始终保持最佳状态</p>
             <div class="btn-group">
                 <a href="#features" class="btn btn-primary">了解功能</a>
-                <a href="https://github.com/MoKangMedical/opc-sync-hub" class="btn btn-secondary">GitHub</a>
+                <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub" class="btn btn-secondary">GitHub</a>
             </div>
         </div>
     </section>
@@ -389,7 +443,7 @@
                         <li>每日健康检查</li>
                         <li>社区支持</li>
                     </ul>
-                    <a href="https://github.com/MoKangMedical/opc-sync-hub" class="btn btn-secondary" style="width:100%">开始使用</a>
+                    <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub" class="btn btn-secondary" style="width:100%">开始使用</a>
                 </div>
                 <div class="pricing-card popular">
                     <h3>Professional</h3>
@@ -401,7 +455,7 @@
                         <li>优先技术支持</li>
                         <li>自定义报告</li>
                     </ul>
-                    <a href="https://github.com/MoKangMedical/opc-sync-hub" class="btn btn-primary" style="width:100%">立即订阅</a>
+                    <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub" class="btn btn-primary" style="width:100%">立即订阅</a>
                 </div>
                 <div class="pricing-card">
                     <h3>Enterprise</h3>
@@ -413,7 +467,7 @@
                         <li>SLA保障</li>
                         <li>私有化部署</li>
                     </ul>
-                    <a href="https://github.com/MoKangMedical/opc-sync-hub" class="btn btn-secondary" style="width:100%">联系我们</a>
+                    <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub" class="btn btn-secondary" style="width:100%">联系我们</a>
                 </div>
             </div>
         </div>
@@ -424,14 +478,20 @@
         <div class="container">
             <h2>开始使用 OPC Sync Hub</h2>
             <p>让项目管理变得简单高效</p>
-            <a href="https://github.com/MoKangMedical/opc-sync-hub" class="btn btn-primary" style="background:white;color:var(--primary)">立即开始</a>
+            <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub" class="btn btn-primary" style="background:white;color:var(--primary)">立即开始</a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer>
+    
+<section style="text-align:center;padding:4rem 2rem;background:linear-gradient(135deg,rgba(99,102,241,.1),transparent)">
+<h2 style="font-size:1.8rem;margin-bottom:1rem">Ready to get started?</h2>
+<p style="color:#94a3b8;margin-bottom:2rem">Join leading organizations using opc-sync-hub</p>
+<a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub" style="display:inline-block;padding:.8rem 2rem;background:#6366f1;color:#fff;border-radius:8px;font-weight:600;text-decoration:none">Get Started Free</a>
+</section>
+<footer>
         <div class="container">
-            <p>&copy; 2026 MoKangMedical. All rights reserved. | <a href="https://mokangmedical.github.io/opc-homepage/">生态首页</a> | <a href="https://github.com/MoKangMedical">GitHub</a></p>
+            <p>&copy; 2026 OPC Sync Hub - 项目同步管理中心. All rights reserved. | <a href="https://mokangmedical.github.io/opc-homepage/">生态首页</a> | <a href="https://github.com/OPC Sync Hub - 项目同步管理中心">GitHub</a></p>
         </div>
     </footer>
 
@@ -495,7 +555,7 @@ document.querySelectorAll('[data-count], .stat-number, .counter').forEach(el => 
     }, 25);
 });
 
-console.log('MoKangMedical interactive features loaded');
+console.log('OPC Sync Hub - 项目同步管理中心 interactive features loaded');
 </script>
 </body>
 </html>
