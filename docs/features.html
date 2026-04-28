@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能特性 - OPC Sync Hub | 多仓库同步与CI/CD编排</title>
+    <meta name="description" content="深入了解OPC Sync Hub的多仓库同步、CI/CD编排、跨项目依赖管理和发布协调等核心功能。">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #10b981;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border: #1e293b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* Top Nav */
+        .topnav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(2,6,23,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topnav-brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .topnav-brand span { color: var(--primary); }
+        .topnav-links { display: flex; gap: 8px; }
+        .topnav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .topnav-links a:hover { color: var(--light); background: rgba(255,255,255,0.05); }
+        .topnav-links a.active { color: var(--primary); background: rgba(37,99,235,0.1); }
+
+        /* Page Hero */
+        .page-hero {
+            padding: 160px 0 100px;
+            text-align: center;
+            background: linear-gradient(180deg, #0c1222 0%, var(--darker) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .page-hero .badge {
+            display: inline-block;
+            background: rgba(37,99,235,0.15);
+            border: 1px solid rgba(37,99,235,0.3);
+            color: #93c5fd;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: 0.03em;
+        }
+        .page-hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-hero p {
+            font-size: 1.15rem;
+            color: var(--gray);
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Section */
+        .content-section { padding: 100px 0; }
+        .content-section.alt { background: var(--dark); }
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-title h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .section-title p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.05rem;
+        }
+
+        /* Feature Deep Dive */
+        .feature-deep {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+        .feature-deep:last-child { margin-bottom: 0; }
+        .feature-deep.reverse { direction: rtl; }
+        .feature-deep.reverse > * { direction: ltr; }
+        .feature-deep .text h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .feature-deep .text h3 .emoji { font-size: 1.8rem; }
+        .feature-deep .text p {
+            color: var(--gray);
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+        .feature-deep .text .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-deep .text .feature-list li {
+            padding: 10px 0;
+            color: var(--gray);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .feature-deep .text .feature-list li:last-child { border-bottom: none; }
+        .feature-deep .text .feature-list li .check {
+            color: var(--accent);
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Visual panel */
+        .visual-panel {
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            min-height: 380px;
+            position: relative;
+            overflow: hidden;
+        }
+        .visual-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(37,99,235,0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Mock terminal */
+        .mock-terminal {
+            background: #0d1117;
+            border-radius: 10px;
+            overflow: hidden;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+        }
+        .mock-terminal .bar {
+            background: #161b22;
+            padding: 8px 12px;
+            display: flex;
+            gap: 6px;
+        }
+        .mock-terminal .bar .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+        .mock-terminal .bar .dot.r { background: #ff5f57; }
+        .mock-terminal .bar .dot.y { background: #febc2e; }
+        .mock-terminal .bar .dot.g { background: #28c840; }
+        .mock-terminal .body { padding: 16px; line-height: 1.8; }
+        .mock-terminal .body .prompt { color: var(--accent); }
+        .mock-terminal .body .cmd { color: #e6edf3; }
+        .mock-terminal .body .output { color: #8b949e; }
+        .mock-terminal .body .success { color: var(--accent); }
+        .mock-terminal .body .info { color: #58a6ff; }
+
+        /* Dep graph mock */
+        .dep-graph {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+        }
+        .dep-node {
+            background: rgba(37,99,235,0.1);
+            border: 1px solid rgba(37,99,235,0.25);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #93c5fd;
+            text-align: center;
+        }
+        .dep-node.accent {
+            background: rgba(16,185,129,0.1);
+            border-color: rgba(16,185,129,0.25);
+            color: #6ee7b7;
+        }
+        .dep-node.warn {
+            background: rgba(251,191,36,0.1);
+            border-color: rgba(251,191,36,0.25);
+            color: #fde68a;
+        }
+        .dep-arrow { color: var(--gray); font-size: 1.2rem; }
+        .dep-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+
+        /* Release timeline mock */
+        .release-timeline {
+            padding: 16px;
+        }
+        .release-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .release-item:last-child { border-bottom: none; }
+        .release-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .release-dot.blue { background: var(--primary); }
+        .release-dot.green { background: var(--accent); }
+        .release-dot.yellow { background: #eab308; }
+        .release-info { flex: 1; }
+        .release-info .name { font-size: 0.85rem; font-weight: 600; color: var(--light); }
+        .release-info .meta { font-size: 0.75rem; color: var(--gray); margin-top: 2px; }
+        .release-tag {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .release-tag.stable { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+        .release-tag.pending { background: rgba(251,191,36,0.15); color: #fde68a; }
+
+        /* Feature grid (quick summary) */
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .quick-card {
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+        .quick-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .quick-card .icon { font-size: 1.8rem; margin-bottom: 14px; }
+        .quick-card h4 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+        .quick-card p { color: var(--gray); font-size: 0.88rem; }
+
+        /* Comparison table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 14px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .comparison-table th {
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .comparison-table td { color: var(--light); }
+        .comparison-table tr:hover td { background: rgba(37,99,235,0.03); }
+        .comparison-table .check-yes { color: var(--accent); }
+        .comparison-table .check-no { color: #ef4444; }
+
+        /* CTA */
+        .cta {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            text-align: center;
+        }
+        .cta h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 16px; }
+        .cta p { font-size: 1.15rem; opacity: 0.9; margin-bottom: 40px; }
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-white { background: white; color: var(--primary); }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            background: var(--darker);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .feature-deep { grid-template-columns: 1fr; gap: 30px; }
+            .feature-deep.reverse { direction: ltr; }
+            .topnav-links a { padding: 6px 10px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="topnav">
+    <a href="index.html" class="topnav-brand">🔄 <span>OPC Sync Hub</span></a>
+    <div class="topnav-links">
+        <a href="about.html">About</a>
+        <a href="features.html" class="active">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="https://github.com/OPC Sync Hub - 项目同步管理中心/opc-sync-hub">GitHub</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="page-hero">
+    <div class="container">
+        <span class="badge">FEATURES</span>
+        <h1>强大的多仓库协调能力</h1>
+        <p>从变更检测到发布上线，OPC Sync Hub 覆盖跨项目协作的每一个环节</p>
+    </div>
+</section>
+
+<!-- Core Features Deep Dive -->
+<section class="content-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>四大核心能力</h2>
+            <p>每一个模块都针对多仓库场景深度优化</p>
+        </div>
+
+        <!-- 1. Multi-Repo Sync -->
+        <div class="feature-deep">
+            <div class="text">
+                <h3><span class="emoji">🔄</span> 多仓库同步</h3>
+                <p>实时监听所有关联仓库的变更事件，智能协调跨仓库的分支对齐和内容同步，消除人工协调的瓶颈。</p>
+                <ul class="feature-list">
+                    <li><span class="check">✓</span> Webhook 实时事件监听，秒级响应</li>
+                    <li><span class="check">✓</span> 自动分支对齐，跨仓库保持一致</li>
+                    <li><span class="check">✓</span> 冲突检测与自动解决策略</li>
+                    <li><span class="check">✓</span> 变更传播路径可视化</li>
+                    <li><span class="check">✓</span> 支持 GitHub / GitLab / Bitbucket</li>
+                </ul>
+            </div>
+            <div class="visual-panel">
+                <div class="mock-terminal">
+                    <div class="bar">
+                        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+                    </div>
+                    <div class="body">
+                        <div><span class="prompt">$</span> <span class="cmd">opc-sync watch --all</span></div>
+                        <div class="output">Watching 73 repositories...</div>
+                        <div class="info">[14:32:01] DrugMind: push to main (abc1234)</div>
+                        <div class="success">[14:32:02] Propagating to PharmaSim, MediChat-RD</div>
+                        <div class="info">[14:32:05] PharmaSim: branch sync/abc1234 created</div>
+                        <div class="info">[14:32:06] MediChat-RD: branch sync/abc1234 created</div>
+                        <div class="success">[14:32:08] ✓ All syncs completed (2 repos)</div>
+                        <div class="output">───────────────────────────</div>
+                        <div><span class="prompt">$</span> <span class="cmd">opc-sync status</span></div>
+                        <div class="success">✓ 73/73 repos in sync | 0 conflicts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CI/CD Orchestration -->
+        <div class="feature-deep reverse">
+            <div class="text">
+                <h3><span class="emoji">⚙️</span> CI/CD 编排</h3>
+                <p>不是替代各项目的 CI/CD，而是在它们之上构建智能调度层。基于依赖拓扑自动决定构建顺序，最大化并行效率。</p>
+                <ul class="feature-list">
+                    <li><span class="check">✓</span> DAG 拓扑自动排序，无需手动配置</li>
+                    <li><span class="check">✓</span> 无依赖任务自动并行执行</li>
+                    <li><span class="check">✓</span> 失败自动阻断下游，避免级联错误</li>
+                    <li><span class="check">✓</span> 支持 GitHub Actions / Jenkins / 自定义</li>
+                    <li><span class="check">✓</span> 构建效率平均提升 60%</li>
+                </ul>
+            </div>
+            <div class="visual-panel">
+                <div class="mock-terminal">
+                    <div class="bar">
+                        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+                    </div>
+                    <div class="body">
+                        <div><span class="prompt">$</span> <span class="cmd">opc-sync pipeline run --tag v2.4.0</span></div>
+                        <div class="info">[Phase 1/4] Building independent repos...</div>
+                        <div class="output">  ├─ DrugMind ████████████ 45s ✓</div>
+                        <div class="output">  ├─ PharmaSim ██████████ 38s ✓</div>
+                        <div class="output">  └─ Tianyan ████████ 32s ✓</div>
+                        <div class="info">[Phase 2/4] Building dependent repos...</div>
+                        <div class="output">  ├─ MediChat-RD ████████████ 52s ✓</div>
+                        <div class="output">  └─ OPC Shared Lib ██████ 24s ✓</div>
+                        <div class="info">[Phase 3/4] Integration tests...</div>
+                        <div class="success">  └─ E2E Suite ████████████ 67s ✓</div>
+                        <div class="info">[Phase 4/4] Deploying...</div>
+                        <div class="success">  └─ All services deployed ✓</div>
+                        <div class="success">═════════════════════════</div>
+                        <div class="success">✓ Pipeline complete in 3m 58s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Dependency Management -->
+        <div class="feature-deep">
+            <div class="text">
+                <h3><span class="emoji">🧩</span> 跨项目依赖管理</h3>
+                <p>自动扫描和构建项目间的依赖关系图，当底层库变更时，精确计算影响范围并自动触发相关项目的验证。</p>
+                <ul class="feature-list">
+                    <li><span class="check">✓</span> 自动发现 package.json / go.mod 等依赖</li>
+                    <li><span class="check">✓</span> 交互式依赖关系图可视化</li>
+                    <li><span class="check">✓</span> 变更影响分析，精确到文件级</li>
+                    <li><span class="check">✓</span> 自动触发下游项目的回归测试</li>
+                    <li><span class="check">✓</span> 依赖版本锁定与升级协调</li>
+                </ul>
+            </div>
+            <div class="visual-panel">
+                <div class="dep-graph">
+                    <div class="dep-node">opc-shared-types</div>
+                    <div class="dep-arrow">↓</div>
+                    <div class="dep-row">
+                        <div class="dep-node warn">opc-auth-sdk</div>
+                        <div class="dep-node accent">opc-api-client</div>
+                    </div>
+                    <div class="dep-arrow">↓</div>
+                    <div class="dep-row">
+                        <div class="dep-node">DrugMind</div>
+                        <div class="dep-node">PharmaSim</div>
+                        <div class="dep-node">MediChat-RD</div>
+                    </div>
+                    <div class="dep-arrow">↓</div>
+                    <div class="dep-row">
+                        <div class="dep-node accent">opc-homepage</div>
+                        <div class="dep-node warn">opc-sync-hub</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Release Coordination -->
+        <div class="feature-deep reverse">
+            <div class="text">
+                <h3><span class="emoji">📦</span> 发布协调</h3>
+                <p>跨项目统一版本对齐、变更日志自动聚合、灰度发布和一键回滚。让发布从紧张的"大爆炸"变为可控的流程。</p>
+                <ul class="feature-list">
+                    <li><span class="check">✓</span> 跨项目版本号自动对齐（SemVer）</li>
+                    <li><span class="check">✓</span> 变更日志从多个仓库自动聚合</li>
+                    <li><span class="check">✓</span> 灰度发布，按百分比逐步放量</li>
+                    <li><span class="check">✓</span> 一键回滚，原子性保证一致性</li>
+                    <li><span class="check">✓</span> 发布审批工作流，支持多人审批</li>
+                </ul>
+            </div>
+            <div class="visual-panel">
+                <div class="release-timeline">
+                    <div class="release-item">
+                        <div class="release-dot green"></div>
+                        <div class="release-info">
+                            <div class="name">v2.4.0 - 生态统一发布</div>
+                            <div class="meta">7 repos · 23 changes · 2026-04-25</div>
+                        </div>
+                        <span class="release-tag stable">Stable</span>
+                    </div>
+                    <div class="release-item">
+                        <div class="release-dot blue"></div>
+                        <div class="release-info">
+                            <div class="name">v2.3.2 - 热修复补丁</div>
+                            <div class="meta">3 repos · 5 changes · 2026-04-18</div>
+                        </div>
+                        <span class="release-tag stable">Stable</span>
+                    </div>
+                    <div class="release-item">
+                        <div class="release-dot yellow"></div>
+                        <div class="release-info">
+                            <div class="name">v2.5.0-rc.1 - 候选发布</div>
+                            <div class="meta">12 repos · 47 changes · 2026-04-28</div>
+                        </div>
+                        <span class="release-tag pending">RC</span>
+                    </div>
+                    <div class="release-item">
+                        <div class="release-dot blue"></div>
+                        <div class="release-info">
+                            <div class="name">v2.3.1 - 依赖升级</div>
+                            <div class="meta">15 repos · 8 changes · 2026-04-10</div>
+                        </div>
+                        <span class="release-tag stable">Stable</span>
+                    </div>
+                    <div class="release-item">
+                        <div class="release-dot green"></div>
+                        <div class="release-info">
+                            <div class="name">v2.3.0 - 功能发布</div>
+                            <div class="meta">9 repos · 31 changes · 2026-04-02</div>
+                        </div>
+                        <span class="release-tag stable">Stable</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Features Grid -->
+<section class="content-section alt">
+    <div class="container">
+        <div class="section-title">
+            <h2>更多能力</h2>
+            <p>围绕多仓库场景构建的完整工具链</p>
+        </div>
+        <div class="quick-grid">
+            <div class="quick-card">
+                <div class="icon">🔍</div>
+                <h4>健康检查</h4>
+                <p>定期扫描所有项目的构建状态、部署状态和运行健康，异常自动告警通知。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">📊</div>
+                <h4>报告生成</h4>
+                <p>自动汇总生态级别的数据报告，包括构建成功率、平均耗时、趋势分析等。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">🔔</div>
+                <h4>事件通知</h4>
+                <p>支持 Slack、钉钉、邮件、Webhook 等多渠道通知，关键事件绝不遗漏。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">🛡️</div>
+                <h4>权限管理</h4>
+                <p>细粒度的仓库和操作权限控制，支持团队角色和审批工作流。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">📈</div>
+                <h4>监控面板</h4>
+                <p>实时可视化所有仓库的同步状态、构建进度和发布管线状态。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">🔌</div>
+                <h4>插件系统</h4>
+                <p>可扩展的插件架构，支持自定义同步策略、通知渠道和集成第三方服务。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">🌐</div>
+                <h4>多平台支持</h4>
+                <p>兼容 GitHub、GitLab、Bitbucket，支持混合平台的仓库统一管理。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">⏱️</div>
+                <h4>定时任务</h4>
+                <p>Cron 表达式配置定时同步、健康检查和报告生成，完全自动化运行。</p>
+            </div>
+            <div class="quick-card">
+                <div class="icon">🔒</div>
+                <h4>安全审计</h4>
+                <p>所有操作记录完整审计日志，支持合规审查和操作回溯。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison -->
+<section class="content-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>为什么选择 OPC Sync Hub</h2>
+            <p>与传统方案的对比</p>
+        </div>
+        <div style="background:var(--darker);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>能力</th>
+                        <th>手动脚本</th>
+                        <th>通用 CI/CD</th>
+                        <th>OPC Sync Hub</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>多仓库同步</td>
+                        <td class="check-no">✗ 手动执行</td>
+                        <td class="check-no">✗ 不支持</td>
+                        <td class="check-yes">✓ 实时自动</td>
+                    </tr>
+                    <tr>
+                        <td>依赖感知调度</td>
+                        <td class="check-no">✗ 不支持</td>
+                        <td class="check-no">△ 有限支持</td>
+                        <td class="check-yes">✓ DAG 自动拓扑</td>
+                    </tr>
+                    <tr>
+                        <td>跨项目发布协调</td>
+                        <td class="check-no">✗ 手动协调</td>
+                        <td class="check-no">✗ 需要定制</td>
+                        <td class="check-yes">✓ 一键发布</td>
+                    </tr>
+                    <tr>
+                        <td>变更影响分析</td>
+                        <td class="check-no">✗ 不支持</td>
+                        <td class="check-no">✗ 不支持</td>
+                        <td class="check-yes">✓ 精确到文件级</td>
+                    </tr>
+                    <tr>
+                        <td>回滚机制</td>
+                        <td class="check-no">△ 手动回滚</td>
+                        <td class="check-no">△ 单项目</td>
+                        <td class="check-yes">✓ 跨项目原子回滚</td>
+                    </tr>
+                    <tr>
+                        <td>生态级报告</td>
+                        <td class="check-no">✗ 不支持</td>
+                        <td class="check-no">△ 单项目报告</td>
+                        <td class="check-yes">✓ 聚合报告</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <div class="container">
+        <h2>选择适合您的方案</h2>
+        <p>从免费的 Starter 到企业级定制，总有一款适合您的团队</p>
+        <a href="pricing.html" class="btn btn-white">查看定价方案 →</a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <p>&copy; 2026 OPC Sync Hub - 项目同步管理中心. All rights reserved. | <a href="https://mokangmedical.github.io/opc-homepage/">生态首页</a> | <a href="https://github.com/OPC Sync Hub - 项目同步管理中心">GitHub</a></p>
+    </div>
+</footer>
+
+<!-- OPC Eco Nav -->
+<div style="position:fixed;bottom:20px;right:20px;z-index:99;background:rgba(17,24,39,.95);backdrop-filter:blur(10px);border:1px solid #1e293b;border-radius:12px;padding:12px;box-shadow:0 10px 40px rgba(0,0,0,.4);max-width:200px">
+<div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05rem;padding:4px 8px;border-bottom:1px solid #1e293b;margin-bottom:6px">OPC Ecosystem</div>
+<a href="https://mokangmedical.github.io/opc-homepage/" style="display:block;padding:3px 8px;color:#94a3b8;font-size:.78rem;text-decoration:none;border-radius:4px;transition:all .2s">🏠 OPC Home</a>
+<a href="https://mokangmedical.github.io/DrugMind/" style="display:block;padding:3px 8px;color:#94a3b8;font-size:.78rem;text-decoration:none;border-radius:4px;transition:all .2s">💊 DrugMind</a>
+<a href="https://mokangmedical.github.io/PharmaSim/" style="display:block;padding:3px 8px;color:#94a3b8;font-size:.78rem;text-decoration:none;border-radius:4px;transition:all .2s">🧪 PharmaSim</a>
+<a href="https://mokangmedical.github.io/medichat-rd/" style="display:block;padding:3px 8px;color:#94a3b8;font-size:.78rem;text-decoration:none;border-radius:4px;transition:all .2s">🏥 MediChat-RD</a>
+<a href="https://mokangmedical.github.io/tianyan/" style="display:block;padding:3px 8px;color:#94a3b8;font-size:.78rem;text-decoration:none;border-radius:4px;transition:all .2s">👁️ Tianyan</a>
+</div>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.feature-deep, .quick-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+    observer.observe(el);
+});
+</script>
+</body>
+</html>
